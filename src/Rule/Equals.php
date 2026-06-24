@@ -2,6 +2,7 @@
 
 namespace Meritum\Validation\Rule;
 
+use Meritum\Validation\Missing;
 use Meritum\Validation\RuleInterface;
 
 final class Equals implements RuleInterface
@@ -13,6 +14,10 @@ final class Equals implements RuleInterface
 
     public function validate(mixed $value, mixed ...$params): bool
     {
+        if ($value instanceof Missing) {
+            return true;
+        }
+
         if (!isset($params[0])) {
             throw new \InvalidArgumentException('Equals rule requires a parameter to match against');
         }

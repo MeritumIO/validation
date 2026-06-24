@@ -2,6 +2,7 @@
 
 namespace Meritum\Validation\Rule;
 
+use Meritum\Validation\Missing;
 use Meritum\Validation\RuleInterface;
 
 final class DateFormat implements RuleInterface
@@ -13,6 +14,10 @@ final class DateFormat implements RuleInterface
 
     public function validate(mixed $value, mixed ...$params): bool
     {
+        if ($value instanceof Missing) {
+            return true;
+        }
+
         if (!isset($params[0]) || !is_string($params[0])) {
             throw new \InvalidArgumentException('The DateFormat rule requires a format parameter that must be a string.');
         }

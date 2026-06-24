@@ -1,6 +1,6 @@
 # meritum/validation
 
-Validation library for the Meritum ecosystem. Provides a rule-agnostic engine, a set of 32 default rules, and kernel integration via `ValidationModule`.
+Validation library for the Meritum ecosystem. Provides a rule-agnostic engine, a set of 31 default rules, and kernel integration via `ValidationModule`.
 
 ## Requirements
 
@@ -24,7 +24,7 @@ $result = $validator->validate(
     [
         'name'     => ['required', 'string', 'lengthMin' => [2], 'lengthMax' => [100]],
         'email'    => ['required', 'email'],
-        'age'      => ['optional', 'integer', 'min' => [18]],
+        'age'      => ['integer', 'min' => [18]],
         'password' => ['required', 'string', 'lengthMin' => [8]],
         'password_confirmation' => ['required', 'sameAs' => 'password'],
     ],
@@ -44,17 +44,16 @@ foreach ($result->getErrors() as $attribute => $messages) {
 
 | Rules | Missing | `null` | Present |
 |---|---|---|---|
-| `['string']` | fails | fails | validated |
+| `['string']` | passes | fails | validated |
 | `['required', 'string']` | fails (stops) | fails (stops) | validated |
-| `['optional', 'string']` | passes | passes | validated |
-| `['nullable', 'string']` | fails | passes | validated |
+| `['nullable', 'string']` | passes | passes | validated |
 | `['nullable', 'required', 'string']` | fails (stops) | passes | validated |
 
-- **`optional`** — field may be absent or null; if present and non-null, remaining rules run
-- **`nullable`** — null is explicitly valid; if the value is null, remaining rules are skipped
-- **`required`** — field must be present, non-null, and non-empty
+- **`required`** — field must be present, non-null, and non-empty; stops propagation on failure
+- **`nullable`** — null passes and remaining rules are skipped; if absent, passes like any other rule
+- Fields without `required` are implicitly optional — type rules only run when the value is present
 - `nullable` + `required` expresses "must be present, but null is acceptable"
-- Rule order matters — `optional` and `nullable` must appear before the rules they gate
+- Rule order matters — `nullable` must appear before the rules it gates
 
 ### Dot notation and wildcards
 
@@ -64,7 +63,7 @@ Nested attributes use dot notation. Wildcards validate each element of an array.
 $result = $validator->validate(
     [
         'address.city'           => ['required', 'string'],
-        'address.postcode'       => ['optional', 'string'],
+        'address.postcode'       => ['string'],
         'items.*.name'           => ['required', 'string'],
         'items.*.price'          => ['required', 'numeric', 'min' => [0]],
         'items.*.variants.*.sku' => ['required', 'string'],
@@ -85,7 +84,7 @@ use Meritum\Validation\ValidationModule;
 $kernel->addModule(new ValidationModule());
 ```
 
-The module binds `Validator::class` to `ValidationEngine` via `ValidationEngineFactory`, and tags all 32 default rules with `validation.rules`. The factory resolves tagged rules at boot time and spreads them into the engine.
+The module binds `Validator::class` to `ValidationEngine` via `ValidationEngineFactory`, and tags all 31 default rules with `validation.rules`. The factory resolves tagged rules at boot time and spreads them into the engine.
 
 ## Adding custom rules
 
@@ -201,8 +200,7 @@ $validator->validate(['end_date' => ['required', 'date', 'greaterThan' => 'start
 
 | Rule | Schema | Description |
 |---|---|---|
-| `required` | `'required'` | Must be present, non-null, and non-empty string |
-| `optional` | `'optional'` | Absent or null passes; if present and non-null, remaining rules run |
+| `required` | `'required'` | Must be present, non-null, and non-empty string; stops propagation on failure |
 | `nullable` | `'nullable'` | Null passes and remaining rules are skipped |
 
 ### Type

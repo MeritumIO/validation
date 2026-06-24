@@ -2,6 +2,7 @@
 
 namespace Meritum\Validation\Rule;
 
+use Meritum\Validation\Missing;
 use Meritum\Validation\RuleInterface;
 
 final class LengthMin implements RuleInterface
@@ -13,6 +14,10 @@ final class LengthMin implements RuleInterface
 
     public function validate(mixed $value, mixed ...$params): bool
     {
+        if ($value instanceof Missing) {
+            return true;
+        }
+
         if (!isset($params[0]) || !is_numeric($params[0])) {
             throw new \InvalidArgumentException('LengthMin rule requires a length parameter to be set and numeric');
         }

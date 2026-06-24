@@ -39,14 +39,14 @@ final class ValidationModuleTest extends TestCase
         $this->assertContains(Validator::class, $this->captureRegisteredIds());
     }
 
-    public function test_registers_thirty_two_default_rules(): void
+    public function test_registers_thirty_one_default_rules(): void
     {
         $ruleIds = array_filter(
             $this->captureRegisteredIds(),
             fn(string $id) => $id !== Validator::class,
         );
 
-        $this->assertCount(32, $ruleIds);
+        $this->assertCount(31, $ruleIds);
     }
 
     public function test_all_registered_rules_implement_rule_interface(): void
@@ -82,7 +82,7 @@ final class ValidationModuleTest extends TestCase
 
         (new ValidationModule())->register($kernel);
 
-        $this->assertSame(32, $tagCount);
+        $this->assertSame(31, $tagCount);
     }
 
     public function test_registers_validator_with_engine_factory(): void

@@ -19,6 +19,10 @@ final class DifferentFrom implements FieldReferencingRuleInterface
 
     public function validate(mixed $value, mixed ...$params): bool
     {
+        if ($value instanceof Missing) {
+            return true;
+        }
+
         if ($params[0] instanceof Missing) {
             return false;
         }

@@ -5,7 +5,6 @@ namespace Meritum\Validation\Test;
 use Meritum\Validation\Rule\DifferentFrom;
 use Meritum\Validation\Rule\LengthMin;
 use Meritum\Validation\Rule\Nullable;
-use Meritum\Validation\Rule\Optional;
 use Meritum\Validation\Rule\Required;
 use Meritum\Validation\Rule\SameAs;
 use Meritum\Validation\Rule\StringType;
@@ -20,7 +19,6 @@ final class ValidationEngineTest extends TestCase
     {
         $this->engine = new ValidationEngine(
             new Required(),
-            new Optional(),
             new Nullable(),
             new StringType(),
             new LengthMin(),
@@ -111,51 +109,21 @@ final class ValidationEngineTest extends TestCase
         $this->assertCount(1, $result->getErrors()['name']);
     }
 
-    public function test_optional_skips_when_missing(): void
-    {
-        $result = $this->engine->validate(
-            ['bio' => ['optional', 'string']],
-            [],
-        );
-
-        $this->assertTrue($result->passed());
-    }
-
-    public function test_optional_skips_when_null(): void
-    {
-        $result = $this->engine->validate(
-            ['bio' => ['optional', 'string']],
-            ['bio' => null],
-        );
-
-        $this->assertTrue($result->passed());
-    }
-
-    public function test_optional_passes_when_present_and_valid(): void
-    {
-        $result = $this->engine->validate(
-            ['bio' => ['optional', 'string']],
-            ['bio' => 'hello'],
-        );
-
-        $this->assertTrue($result->passed());
-    }
-
-    public function test_optional_validates_when_present_and_invalid(): void
-    {
-        $result = $this->engine->validate(
-            ['bio' => ['optional', 'string']],
-            ['bio' => 42],
-        );
-
-        $this->assertFalse($result->passed());
-    }
-
     public function test_nullable_skips_when_null(): void
     {
         $result = $this->engine->validate(
             ['bio' => ['nullable', 'string']],
             ['bio' => null],
+        );
+
+        $this->assertTrue($result->passed());
+    }
+
+    public function test_nullable_passes_when_missing(): void
+    {
+        $result = $this->engine->validate(
+            ['bio' => ['nullable', 'string']],
+            [],
         );
 
         $this->assertTrue($result->passed());
@@ -270,21 +238,21 @@ final class ValidationEngineTest extends TestCase
         );
     }
 
-    public function test_field_without_optional_fails_when_missing(): void
+    public function test_field_without_required_passes_when_missing(): void
     {
         $result = $this->engine->validate(
             ['bio' => ['string']],
             [],
         );
 
-        $this->assertFalse($result->passed());
+        $this->assertTrue($result->passed());
     }
 
     public function test_stoppable_rule_prevents_subsequent_rules_from_running(): void
     {
         $result = $this->engine->validate(
-            ['name' => ['optional', 'string', 'lengthMin' => [4]]],
-            [],
+            ['name' => ['nullable', 'string', 'lengthMin' => [4]]],
+            ['name' => null],
         );
 
         $this->assertTrue($result->passed());
@@ -294,7 +262,7 @@ final class ValidationEngineTest extends TestCase
     public function test_stoppable_rule_without_stop_condition_allows_subsequent_rules(): void
     {
         $result = $this->engine->validate(
-            ['name' => ['optional', 'string', 'lengthMin' => [4]]],
+            ['name' => ['nullable', 'string', 'lengthMin' => [4]]],
             ['name' => 'Jo'],
         );
 

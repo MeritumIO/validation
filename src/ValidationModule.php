@@ -36,7 +36,6 @@ final class ValidationModule implements ModuleInterface
         Rule\NotIn::class,
         Rule\Nullable::class,
         Rule\Numeric::class,
-        Rule\Optional::class,
         Rule\RegEx::class,
         Rule\Required::class,
         Rule\SameAs::class,

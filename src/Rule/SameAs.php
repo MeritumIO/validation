@@ -19,6 +19,10 @@ final class SameAs implements FieldReferencingRuleInterface
 
     public function validate(mixed $value, mixed ...$params): bool
     {
+        if ($value instanceof Missing) {
+            return true;
+        }
+
         return $value === $params[0];
     }
 
