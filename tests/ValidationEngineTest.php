@@ -2,12 +2,15 @@
 
 namespace Meritum\Validation\Test;
 
+use Meritum\Validation\Exception\RuleException;
 use Meritum\Validation\Rule\DifferentFrom;
+use Meritum\Validation\Rule\Email;
 use Meritum\Validation\Rule\LengthMin;
 use Meritum\Validation\Rule\Nullable;
 use Meritum\Validation\Rule\Required;
 use Meritum\Validation\Rule\SameAs;
 use Meritum\Validation\Rule\StringType;
+use Meritum\Validation\RuleInterface;
 use Meritum\Validation\ValidationEngine;
 use PHPUnit\Framework\TestCase;
 
@@ -226,6 +229,40 @@ final class ValidationEngineTest extends TestCase
 
         $this->assertTrue($result->passed());
         $this->assertEmpty($result->getErrors());
+    }
+
+    public function test_throws_when_two_rules_share_a_name(): void
+    {
+        $this->expectException(RuleException::class);
+        $this->expectExceptionMessage('cannot register name [email], already registered by [' . Email::class . ']');
+
+        new ValidationEngine(
+            new Email(),
+            new class implements RuleInterface {
+                public function name(): string
+                {
+                    return 'email';
+                }
+
+                public function validate(mixed $value, mixed ...$params): bool
+                {
+                    return true;
+                }
+
+                public function message(string $attribute, mixed ...$params): string
+                {
+                    return "The {$attribute} is invalid";
+                }
+            },
+        );
+    }
+
+    public function test_throws_when_the_same_rule_is_given_twice(): void
+    {
+        $this->expectException(RuleException::class);
+        $this->expectExceptionMessage('Rule [' . Email::class . '] cannot register name [email], already registered by [' . Email::class . ']');
+
+        new ValidationEngine(new Email(), new Email());
     }
 
     public function test_throws_for_unknown_rule(): void

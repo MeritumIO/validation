@@ -5,6 +5,7 @@ namespace Meritum\Validation\Factory;
 use Meritum\Validation\Validator;
 use Meritum\Validation\RuleInterface;
 use Psr\Container\ContainerInterface;
+use Meritum\Validation\ValidationOption;
 use Meritum\Validation\ValidationEngine;
 use Georgeff\Kernel\DI\TagRegistryInterface;
 
@@ -23,7 +24,7 @@ final class ValidationEngineFactory
     private function getValidationRules(TagRegistryInterface $registry): array
     {
         /** @var RuleInterface[] $rules */
-        $rules = $registry->getTagged('validation.rules');
+        $rules = $registry->getTagged(ValidationOption::RuleTag->value);
 
         return $rules;
     }
