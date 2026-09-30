@@ -1,5 +1,9 @@
 # meritum/validation
 
+[![CI](https://github.com/MeritumIO/validation/actions/workflows/ci.yml/badge.svg)](https://github.com/MeritumIO/validation/actions/workflows/ci.yml)
+[![Coverage Status](https://coveralls.io/repos/github/MeritumIO/validation/badge.svg?branch=main)](https://coveralls.io/github/MeritumIO/validation?branch=main)
+[![Packagist Version](https://img.shields.io/packagist/v/meritum/validation)](https://packagist.org/packages/meritum/validation)
+
 Validation library for the Meritum ecosystem. Provides a rule-agnostic engine, a set of 31 default rules, and kernel integration via `ValidationModule`.
 
 ## Requirements
