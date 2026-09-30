@@ -3,7 +3,7 @@
 namespace Meritum\Validation;
 
 use Georgeff\Kernel\KernelInterface;
-use Georgeff\Kernel\Module\ModuleInterface;
+use Georgeff\Kernel\Contract\ModuleInterface;
 
 final class ValidationModule implements ModuleInterface
 {
@@ -49,7 +49,7 @@ final class ValidationModule implements ModuleInterface
         $kernel->define(Validator::class, new Factory\ValidationEngineFactory());
 
         foreach ($this->rules as $rule) {
-            $kernel->define($rule, fn() => new $rule())->tag('validation.rules');
+            $kernel->define($rule, fn() => new $rule())->tag(ValidationOption::RuleTag->value);
         }
     }
 }

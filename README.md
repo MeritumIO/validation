@@ -5,7 +5,7 @@ Validation library for the Meritum ecosystem. Provides a rule-agnostic engine, a
 ## Requirements
 
 - PHP 8.4+
-- `georgeff/kernel` ^1.6
+- `georgeff/kernel` ^2.0
 
 ## Installation
 
@@ -88,7 +88,7 @@ The module binds `Validator::class` to `ValidationEngine` via `ValidationEngineF
 
 ## Adding custom rules
 
-Implement `RuleInterface` and register the class with the kernel tagged as `validation.rules`. The rule's `name()` return value is the string used in schemas.
+Implement `RuleInterface` and register the class with the kernel using the `validation.rules` tag. The `ValidationOption` enum holds the tag name. The rule's `name()` return value is the string used in schemas.
 
 ```php
 use Meritum\Validation\RuleInterface;
@@ -113,7 +113,9 @@ final class Slug implements RuleInterface
 ```
 
 ```php
-$kernel->define(Slug::class, fn() => new Slug())->tag('validation.rules');
+use Meritum\Validation\ValidationOption;
+
+$kernel->define(Slug::class, fn() => new Slug())->tag(ValidationOption::RuleTag->value);
 ```
 
 ```php
@@ -122,20 +124,24 @@ $validator->validate(['handle' => ['required', 'slug']], $input);
 
 ### Overriding a default rule
 
-Register a new class that returns the same `name()` as the rule you want to replace. The last registration wins.
+Override the default rule's definition with `$kernel->override()`, passing `preserve: true` so the replacement keeps the rule tag. The replacement should return the same `name()` as the rule it replaces, so existing schemas keep working.
 
 ```php
+use Meritum\Validation\Rule;
+
 final class StrictEmail implements RuleInterface
 {
     public function name(): string
     {
-        return 'email'; // replaces the default Email rule
+        return 'email';
     }
     // ...
 }
 
-$kernel->define(StrictEmail::class, fn() => new StrictEmail())->tag('validation.rules');
+$kernel->override(Rule\Email::class, fn() => new StrictEmail(), preserve: true);
 ```
+
+Rule names must be unique. Registering a second tagged rule with a name that's already taken (e.g. `define(StrictEmail::class, ...)` tagged alongside the default `Email` rule) throws a `RuleException` when `Validator` is first resolved.
 
 ### Stoppable rules
 

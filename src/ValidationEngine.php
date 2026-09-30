@@ -2,7 +2,7 @@
 
 namespace Meritum\Validation;
 
-use Georgeff\Kernel\Debug\DebuggableInterface;
+use Georgeff\Kernel\Contract\DebuggableInterface;
 
 /**
  * @internal
@@ -27,7 +27,15 @@ final class ValidationEngine implements Validator, DebuggableInterface
         $map = [];
 
         foreach ($rules as $rule) {
-            $map[$rule->name()] = $rule;
+            $name = $rule->name();
+
+            if (isset($map[$name])) {
+                $existing = $map[$name];
+
+                Exception\RuleException::throwOnConflictingRule($name, $existing::class, $rule::class);
+            }
+
+            $map[$name] = $rule;
         }
 
         $this->rules = $map;

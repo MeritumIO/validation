@@ -6,6 +6,7 @@ use Georgeff\Kernel\DI\DefinitionInterface;
 use Georgeff\Kernel\KernelInterface;
 use Meritum\Validation\Factory\ValidationEngineFactory;
 use Meritum\Validation\RuleInterface;
+use Meritum\Validation\ValidationEngine;
 use Meritum\Validation\ValidationModule;
 use Meritum\Validation\Validator;
 use PHPUnit\Framework\TestCase;
@@ -62,6 +63,25 @@ final class ValidationModuleTest extends TestCase
                 "{$id} does not implement RuleInterface",
             );
         }
+    }
+
+    public function test_default_rule_names_do_not_conflict(): void
+    {
+        $rules = array_map(
+            function (string $id): RuleInterface {
+                $rule = new $id();
+                $this->assertInstanceOf(RuleInterface::class, $rule);
+                return $rule;
+            },
+            array_values(array_filter(
+                $this->captureRegisteredIds(),
+                fn(string $id) => $id !== Validator::class,
+            )),
+        );
+
+        $engine = new ValidationEngine(...$rules);
+
+        $this->assertCount(31, $engine->getDebugInfo()['rules']);
     }
 
     public function test_rule_definitions_are_tagged_with_validation_rules(): void
